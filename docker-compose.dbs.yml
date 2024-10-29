@@ -151,7 +151,9 @@ services:
       - '16686:16686'
       - '4317:4317'
   app:
-    image: node:22 # Use an appropriate image for your application
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: app
     volumes:
       - .:/usr/src/app
