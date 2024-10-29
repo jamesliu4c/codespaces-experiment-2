@@ -90,18 +90,18 @@ services:
     volumes:
       - redisvolume:/data
     command: [ "redis-server", "--databases", "50" ]
-  monstache:
-    build:
-      context: ../../services/monstache
-    hostname: monstache
-    container_name: monstache
-    environment:
-      - ENV=development
-      - MONSTACHE_MONGO_URL=mongodb://mongodb:27017
-      - MONSTACHE_ES_URLS=http://elasticsearch:9200
-    depends_on:
-      - mongo
-      - elasticsearch
+  # monstache:
+  #   build:
+  #     context: ../../services/monstache
+  #   hostname: monstache
+  #   container_name: monstache
+  #   environment:
+  #     - ENV=development
+  #     - MONSTACHE_MONGO_URL=mongodb://mongodb:27017
+  #     - MONSTACHE_ES_URLS=http://elasticsearch:9200
+  #   depends_on:
+  #     - mongo
+  #     - elasticsearch
   drafts_postgres:
     image: postgres:15.1
     container_name: drafts_postgres
