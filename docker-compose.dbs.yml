@@ -151,7 +151,7 @@ services:
       - '16686:16686'
       - '4317:4317'
   app:
-    image: node:14 # Use an appropriate image for your application
+    image: node:22 # Use an appropriate image for your application
     container_name: app
     volumes:
       - .:/usr/src/app
