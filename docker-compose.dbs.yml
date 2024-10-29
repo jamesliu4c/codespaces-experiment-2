@@ -2,7 +2,7 @@ version: "3.5"
 services:
   # Connect definitions were removed in commit 761c6ec0fa8d6e1d9339ca51780910fd3309673c
   elasticsearch:
-    image: public.ecr.aws/docker/library/elasticsearch:7.12.1
+    image: elasticsearch:7.12.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -22,7 +22,7 @@ services:
     volumes:
       - elasticsearchvolume:/usr/share/elasticsearch/data
   mariadb:
-    image: public.ecr.aws/docker/library/mariadb:10.5
+    image: mariadb:10.5
     container_name: mariadb
     command: --max_allowed_packet=536870912
     environment:
@@ -36,7 +36,7 @@ services:
     volumes:
       - mariadbvolume:/var/lib/mysql
   mongo:
-    image: public.ecr.aws/docker/library/mongo:4.2.24
+    image: mongo:4.2.24
     hostname: mongodb
     container_name: mongodb
     volumes:
@@ -53,7 +53,7 @@ services:
       start_period: 30s
     command: [ "mongod", "--bind_ip_all", "--replSet", "rs1" ]
   postgres:
-    image: public.ecr.aws/docker/library/postgres:10.17
+    image: postgres:10.17
     container_name: postgres
     environment:
       - POSTGRES_PASSWORD=pass
@@ -67,7 +67,7 @@ services:
     volumes:
       - postgresvolume:/var/lib/postgresql/data
   rabbitmq:
-    image: public.ecr.aws/docker/library/rabbitmq:3-management
+    image: rabbitmq:3-management
     container_name: rabbitmq
     volumes:
       - ./rabbitmq-heartbeat.conf:/etc/rabbitmq/conf.d/11-heartbeat.conf
@@ -79,7 +79,7 @@ services:
       - 127.0.0.1:5672:5672
       - 127.0.0.1:15672:15672
   redis:
-    image: public.ecr.aws/docker/library/redis:7.0
+    image: redis:7.0
     container_name: redis
     ulimits:
       nofile:
@@ -125,7 +125,7 @@ services:
     ports:
       - 127.0.0.1:6380:6379
   drafts_test_db:
-    image: public.ecr.aws/docker/library/postgres:15.1
+    image: postgres:15.1
     container_name: drafts_test_db
     environment:
       - POSTGRES_PASSWORD=pass
@@ -135,7 +135,7 @@ services:
     volumes:
       - drafts-test-db:/var/lib/postgresql/data
   drafts_test_redis:
-    image: public.ecr.aws/docker/library/redis:7.0
+    image: redis:7.0
     container_name: drafts_test_redis
     command: redis-server --save 60 1
     ports:
