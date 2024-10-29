@@ -1,0 +1,173 @@
+version: "3.5"
+services:
+  # Connect definitions were removed in commit 761c6ec0fa8d6e1d9339ca51780910fd3309673c
+  elasticsearch:
+    image: public.ecr.aws/docker/library/elasticsearch:7.12.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://localhost:1358,http://127.0.0.1:1358
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:9200:9200
+      - 127.0.0.1:9300:9300
+    volumes:
+      - elasticsearchvolume:/usr/share/elasticsearch/data
+  mariadb:
+    image: public.ecr.aws/docker/library/mariadb:10.5
+    container_name: mariadb
+    command: --max_allowed_packet=536870912
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - mariadbvolume:/var/lib/mysql
+  mongo:
+    image: public.ecr.aws/docker/library/mongo:4.2.24
+    hostname: mongodb
+    container_name: mongodb
+    volumes:
+      - mongovolume:/data/db
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:27017:27017
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+    command: [ "mongod", "--bind_ip_all", "--replSet", "rs1" ]
+  postgres:
+    image: public.ecr.aws/docker/library/postgres:10.17
+    container_name: postgres
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=root
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - postgresvolume:/var/lib/postgresql/data
+  rabbitmq:
+    image: public.ecr.aws/docker/library/rabbitmq:3-management
+    container_name: rabbitmq
+    volumes:
+      - ./rabbitmq-heartbeat.conf:/etc/rabbitmq/conf.d/11-heartbeat.conf
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:5672:5672
+      - 127.0.0.1:15672:15672
+  redis:
+    image: public.ecr.aws/docker/library/redis:7.0
+    container_name: redis
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - redisvolume:/data
+    command: [ "redis-server", "--databases", "50" ]
+  monstache:
+    build:
+      context: ../../services/monstache
+    hostname: monstache
+    container_name: monstache
+    environment:
+      - ENV=development
+      - MONSTACHE_MONGO_URL=mongodb://mongodb:27017
+      - MONSTACHE_ES_URLS=http://elasticsearch:9200
+    depends_on:
+      - mongo
+      - elasticsearch
+  drafts_postgres:
+    image: postgres:15.1
+    container_name: drafts_postgres
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=root
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 127.0.0.1:5445:5432
+    volumes:
+      - drafts-dev-db:/var/lib/postgresql/data
+  drafts_redis:
+    image: redis:7
+    container_name: drafts_redis
+    command: redis-server --save 60 1
+    volumes:
+      - drafts-dev-redis:/data
+    ports:
+      - 127.0.0.1:6380:6379
+  drafts_test_db:
+    image: public.ecr.aws/docker/library/postgres:15.1
+    container_name: drafts_test_db
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=root
+    ports:
+      - 127.0.0.1:5446:5432
+    volumes:
+      - drafts-test-db:/var/lib/postgresql/data
+  drafts_test_redis:
+    image: public.ecr.aws/docker/library/redis:7.0
+    container_name: drafts_test_redis
+    command: redis-server --save 60 1
+    ports:
+      - 127.0.0.1:6381:6379
+    volumes:
+      - drafts-test-redis:/data
+  jaeger_tracing:
+    image: 'jaegertracing/all-in-one:1.57.0'
+    container_name: jaeger_tracing
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - '16686:16686'
+      - '4317:4317'
+  app:
+    image: node:14 # Use an appropriate image for your application
+    container_name: app
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    command: npm start # Adjust the command as needed for your application
+    ports:
+      - "3000:3000" # Adjust the ports as needed for your application
+
+volumes:
+  mongovolume:
+  mariadbvolume:
+  postgresvolume:
+  redisvolume:
+  elasticsearchvolume:
+  pandavolume:
+  drafts-dev-db:
+  drafts-test-db:
+  drafts-dev-redis:
+  drafts-test-redis:

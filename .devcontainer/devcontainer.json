@@ -1,0 +1,8 @@
+{
+    "name": "Scope Dev Container",
+    "dockerComposeFile": "docker-compose.dbs.yml",
+    "service": "app",
+    "workspaceFolder": "/usr/src/app",
+    "postCreateCommand": "node --version",
+    "remoteUser": "vscode"
+}
