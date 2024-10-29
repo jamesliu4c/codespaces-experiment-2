@@ -158,7 +158,6 @@ services:
     volumes:
       - .:/usr/src/app
     working_dir: /usr/src/app
-    command: bash
     ports:
       - "3000:3000" # Adjust the ports as needed for your application
 
