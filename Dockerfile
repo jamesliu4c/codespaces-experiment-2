@@ -1,4 +1,8 @@
 FROM node:22
+
+# Create the vscode user
+RUN useradd -ms /bin/bash vscode
+
 # Set the user to vscode
 USER vscode
 
