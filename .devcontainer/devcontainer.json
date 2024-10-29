@@ -4,5 +4,8 @@
     "service": "app",
     "workspaceFolder": "/usr/src/app",
     "postCreateCommand": "node --version",
+    "remoteEnv": {
+        "BUILDKIT_PROGRESS": "plain"
+    },
     "remoteUser": "vscode"
 }
